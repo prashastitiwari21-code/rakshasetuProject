@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RakshaSetu - Prototype</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <h2>🇮🇳 RakshaSetu</h2>
+      <button class="nav-btn active" id="nav-dash" onclick="showView('dash')">📊 Dashboard</button>
+      <button class="nav-btn" id="nav-contractors" onclick="showView('contractors')">🏢 Contractors</button>
+      <button class="nav-btn" id="nav-incidents" onclick="showView('incidents')">🚨 Incidents <span class="count-pill" id="incident-count">0</span></button>
+      <button class="nav-btn sim-btn" id="nav-sim" onclick="showView('sim')">🎮 Attack Simulator</button>
+      <p class="sidebar-note">Prototype. All data is synthetic.</p>
+    </aside>
+
+    <div class="content">
+
+      <!-- ========== TOP BAR ========== -->
+      <header class="topbar">
+        <div>
+          <strong id="page-title">Overview Dashboard</strong>
+          <span class="top-date" id="today"></span>
+        </div>
+        <div class="top-actions">
+          <button class="small-btn" id="sound-btn" onclick="toggleSound()">🔊 Sound on</button>
+          <button class="small-btn" onclick="resetDemo()">↺ Reset demo data</button>
+        </div>
+      </header>
+
+      <main class="main">
+
+        <!-- ========== DASHBOARD ========== -->
+        <section id="view-dash" class="view active">
+          <div id="alert-banner"></div>
+          <div class="stats" id="stats"></div>
+
+          <div class="grid-2-1">
+            <div class="card">
+              <h3>CyberTrust Score by Contractor</h3>
+              <div id="bars"></div>
+            </div>
+            <div class="card">
+              <h3>Risk Distribution</h3>
+              <div class="donut-wrap">
+                <div class="donut" id="donut"><div class="donut-hole" id="donut-hole"></div></div>
+                <div id="donut-legend"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <h3>Needs Attention</h3>
+              <table>
+                <thead><tr><th>Contractor</th><th>Score</th><th>Risk</th><th></th></tr></thead>
+                <tbody id="dash-body"></tbody>
+              </table>
+            </div>
+            <div class="card">
+              <h3>Recent Incidents</h3>
+              <div id="dash-incidents"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== CONTRACTORS ========== -->
+        <section id="view-contractors" class="view">
+          <div class="controls">
+            <input type="text" id="search" placeholder="Search contractor or department..." oninput="renderDirectory()">
+            <select id="filter" onchange="renderDirectory()">
+              <option value="All">All risk levels</option>
+              <option value="Low">Low</option>
+              <option value="Moderate">Moderate</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+            <select id="sort" onchange="renderDirectory()">
+              <option value="name">Sort: Name (A-Z)</option>
+              <option value="low">Sort: Score (low to high)</option>
+              <option value="high">Sort: Score (high to low)</option>
+            </select>
+          </div>
+
+          <div class="card">
+            <table>
+              <thead>
+                <tr><th>Contractor</th><th>Department</th><th>Project</th><th>Score</th><th>Risk</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody id="dir-body"></tbody>
+            </table>
+            <p class="empty" id="dir-empty">No contractors match your search.</p>
+          </div>
+
+          <details class="card add-card">
+            <summary>➕ Add a new contractor</summary>
+            <div class="form-grid">
+              <div class="field"><label>Contractor name</label><input type="text" id="new-name" placeholder="e.g. Vayu Networks Pvt Ltd"></div>
+              <div class="field"><label>Department</label><input type="text" id="new-dept" placeholder="e.g. Ministry of Civil Aviation"></div>
+              <div class="field"><label>Project</label><input type="text" id="new-project" placeholder="e.g. Airport Systems Upgrade"></div>
+              <div class="field"><label>Incident history</label>
+                <select id="new-incident">
+                  <option value="Good">Good</option>
+                  <option value="Moderate">Moderate</option>
+                  <option value="Poor">Poor</option>
+                  <option value="Critical">Critical</option>
+                </select>
+              </div>
+            </div>
+            <p class="hint">Security factors (0 to 100)</p>
+            <div class="form-grid" id="new-factors"></div>
+            <button class="primary-btn" onclick="addContractor()">Add contractor</button>
+          </details>
+        </section>
+
+        <!-- ========== PROFILE ========== -->
+        <section id="view-profile" class="view">
+          <button class="back-btn" onclick="showView('contractors')">← Back to contractors</button>
+          <div id="profile"></div>
+        </section>
+
+        <!-- ========== INCIDENTS LIST ========== -->
+        <section id="view-incidents" class="view">
+          <div class="card">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Contractor</th><th>Incident</th><th>Severity</th><th>Threat</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody id="inc-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ========== INVESTIGATION ========== -->
+        <section id="view-investigation" class="view">
+          <button class="back-btn" onclick="showView('incidents')">← Back to incidents</button>
+          <div id="investigation"></div>
+        </section>
+
+        <!-- ========== ATTACK SIMULATOR ========== -->
+        <section id="view-sim" class="view">
+          <div class="card sim-card">
+            <h3>🎮 Live Attack Simulator</h3>
+            <p class="hint">Walk through a data-theft attack step by step, like in a live demo.</p>
+
+            <div class="steps" id="sim-steps"></div>
+
+            <div class="sim-buttons">
+              <button class="primary-btn" onclick="manualStep(1)">1. Baseline</button>
+              <button class="warn-btn" onclick="manualStep(2)">2. Surge</button>
+              <button class="danger-btn" onclick="manualStep(3)">3. Critical Spike</button>
+              <button class="good-btn" onclick="manualStep(4)">4. Freeze &amp; Contain</button>
+              <button class="small-btn" id="auto-btn" onclick="toggleAutoPlay()">▶ Auto-play demo</button>
+              <button class="small-btn" onclick="resetSim()">↺ Reset</button>
+            </div>
+
+            <div class="sim-stats">
+              <div class="sim-stat"><div class="label">Files accessed</div><div class="number" id="sim-files">0</div></div>
+              <div class="sim-stat"><div class="label">Sensitive files</div><div class="number" id="sim-sensitive">0</div></div>
+              <div class="sim-stat"><div class="label">Velocity</div><div class="number small" id="sim-velocity">-</div></div>
+              <div class="sim-stat"><div class="label">Status</div><div class="number small" id="sim-status">IDLE</div></div>
+            </div>
+
+            <div class="threat-row">
+              <span>Threat score</span>
+              <div class="bar-track"><div class="bar-fill" id="sim-meter" style="width:0%"></div></div>
+              <strong id="sim-threat">0</strong>
+            </div>
+
+            <div class="log-box" id="sim-log">
+              <div class="log-info">[READY] Click a step (or Auto-play) to start the demo.</div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
